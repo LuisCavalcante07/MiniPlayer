@@ -9,7 +9,7 @@ int main(void) {
     assert(m->id == 1 && strcmp(m->titulo, "Teste") == 0);
     assert(m->duracao == 180);
 
-    //musica_comparar(m,m);// TESTES QUE VAMOS FAZER
+    musica_imprimir(m);
 
     musica_destruir(m);
     puts("test_musica: OK");

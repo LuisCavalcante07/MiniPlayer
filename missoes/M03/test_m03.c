@@ -10,7 +10,7 @@ static int destruicoes = 0;
 
 static void verificar_ordem(void *carga) {
     assert(visitas < 3);
-    assert(carga = esperados[visitas]);
+    assert(carga == esperados[visitas]);
     visitas++;
 }
 

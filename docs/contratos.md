@@ -1,6 +1,6 @@
 # Contratos dos TADs — MiniPlayer
 
-**Escopo:** operações da lista simplesmente encadeada (LSE) documentadas nas missões M02 a M04. Os contratos básicos foram introduzidos na M02 e implementados na M03; as operações adicionais foram desenvolvidas na M04.
+**Escopo:** operações da lista simplesmente encadeada (LSE) desenvolvidas e testadas até a missão M04. Os contratos iniciais foram trabalhados na M02, a estrutura e suas operações básicas foram desenvolvidas na M03, e as operações adicionais de inserção, busca e remoção foram implementadas na M04.
 
 ## 1. Invariantes da LSE
 
@@ -8,105 +8,88 @@
 - `tamanho == 0` se, e somente se, `inicio == NULL`.
 - Existem exatamente `tamanho` nós alcançáveis a partir de `inicio`.
 - O último nó aponta para `NULL`, sem ciclos.
-- Uma inserção bem-sucedida aumenta `tamanho` em uma unidade; uma remoção bem-sucedida o diminui em uma unidade.
-- Consultas não modificam a lista.
+- Uma inserção bem-sucedida aumenta `tamanho` em uma unidade.
+- Uma remoção bem-sucedida diminui `tamanho` em uma unidade.
+- Consultas não modificam a estrutura da lista.
+
+A LSE é representada internamente por uma estrutura `t_lse`, que contém o ponteiro `inicio` e o campo `tamanho`. Cada nó (`t_elem`) armazena uma carga genérica (`void *`) e um ponteiro para o próximo nó.
 
 ## 2. Contratos básicos — M02/M03
 
 ### `lse_criar`
 
-- **Assinatura documentada:** `t_lse *lse_criar(void)`.
+- **Assinatura:** `t_lse *lse_criar(void)`.
 - **Pré-condições:** nenhuma.
-- **Pós-condições:** em caso de sucesso, a lista está vazia (`inicio == NULL` e `tamanho == 0`).
+- **Pós-condições:** em caso de sucesso, cria uma lista vazia, com `inicio == NULL` e `tamanho == 0`.
 - **Retorno:** ponteiro para a lista criada; `NULL` se a alocação falhar.
-- **Memória:** aloca a estrutura da lista; a liberação cabe a `lse_destruir`.
+- **Memória:** aloca a estrutura da lista, que posteriormente deve ser liberada por `lse_destruir`.
 - **Invariantes:** estabelecidas na criação.
-- **Testes associados:** suítes M02 e M03.
+- **Testes associados:** M02 e M03, criação de listas e verificação do estado inicial.
 
 ### `lse_tamanho`
 
-- **Assinatura documentada:** `int lse_tamanho(const t_lse *lista)`.
-- **Pré-condições:** lista válida ou `NULL`, conforme a decisão registrada no projeto.
+- **Assinatura:** `int lse_tamanho(const t_lse *lista)`.
+- **Pré-condições:** recebe uma lista válida ou `NULL`.
 - **Pós-condições:** a lista permanece inalterada.
-- **Retorno:** quantidade de elementos; `0` para lista `NULL`.
-- **Memória:** não aloca nem libera.
+- **Retorno:** quantidade de elementos armazenados; `0` caso a lista seja `NULL`.
+- **Memória:** não realiza alocações nem liberações.
 - **Invariantes:** preservadas por se tratar de consulta.
-- **Testes associados:** suítes M02/M03 e conferências de tamanho na M04.
+- **Testes associados:** M02, M03 e M04, verificações de tamanho antes e depois das operações.
 
 ### `lse_primeiro`
 
-- **Assinatura documentada:** `void *lse_primeiro(const t_lse *lista)`.
-- **Pré-condições:** lista válida ou `NULL`, conforme o tratamento documentado.
-- **Pós-condições:** não remove elementos nem altera a lista.
-- **Retorno:** ponteiro para a carga do primeiro nó; `NULL` para lista vazia ou inválida.
-- **Memória:** não aloca nem libera a carga.
+- **Assinatura:** `void *lse_primeiro(const t_lse *lista)`.
+- **Pré-condições:** recebe uma lista válida ou `NULL`.
+- **Pós-condições:** a lista permanece inalterada e nenhum elemento é removido.
+- **Retorno:** ponteiro para a carga do primeiro nó; `NULL` se a lista for vazia, nula ou se a carga do primeiro nó for `NULL`.
+- **Memória:** não aloca nem libera memória.
 - **Invariantes:** preservadas por se tratar de consulta.
-- **Testes associados:** suítes M02 e M03.
+- **Testes associados:** M02 e M03, consultas em listas vazias e com elementos.
+
+### `lse_inserir_inicio`
+
+- **Assinatura:** `int lse_inserir_inicio(t_lse *lista, void *carga)`.
+- **Pré-condições:** a lista deve ser válida.
+- **Pós-condições:** em caso de sucesso, cria um nó no início da lista, atualiza `inicio` e incrementa `tamanho`.
+- **Retorno:** `1` em caso de sucesso; `0` se a lista for `NULL` ou a alocação do nó falhar.
+- **Memória:** aloca um novo nó, armazenando o ponteiro para a carga sem copiar seu conteúdo.
+- **Invariantes:** preserva o encadeamento e a contagem de elementos.
+- **Testes associados:** M03, inserção de elementos e verificação da ordem de percurso; M04, verificação de argumentos inválidos.
+
+### `lse_percorrer`
+
+- **Assinatura:** `void lse_percorrer(const t_lse *lista, t_visitar cb_visitar)`.
+- **Pré-condições:** recebe uma lista e um callback de visitação. Se algum deles for `NULL`, a função encerra sem realizar o percurso.
+- **Pós-condições:** percorre os nós do início ao fim, executando `cb_visitar` para cada carga, sem modificar diretamente os encadeamentos.
+- **Retorno:** não possui.
+- **Memória:** não aloca nem libera nós.
+- **Invariantes:** preservadas pela própria função, desde que o callback não altere ou destrua a estrutura durante o percurso.
+- **Testes associados:** M03, conferência da ordem de visitação; M04, conferência da sequência de elementos.
 
 ### `lse_destruir`
 
-- **Assinatura documentada:** `void lse_destruir(t_lse *lista, void (*destruir_carga)(void *))`.
-- **Pré-condições:** lista válida e ainda não destruída; `destruir_carga` pode ser `NULL`.
-- **Pós-condições:** libera nós e estrutura; se houver callback, este pode ser usado para liberar as cargas sob responsabilidade da lista. O ponteiro destruído deixa de ser válido.
+- **Assinatura:** `void lse_destruir(t_lse *lista, void (*destruir_carga)(void *))`.
+- **Pré-condições:** recebe uma lista válida ou `NULL`. O callback de destruição pode ser `NULL`.
+- **Pós-condições:** libera todos os nós e a estrutura da lista. Se um callback for informado, ele será chamado para cada carga antes da liberação do respectivo nó.
 - **Retorno:** não possui.
-- **Memória:** libera a estrutura e os nós; libera cargas apenas por meio do callback informado.
+- **Memória:** libera a lista e seus nós. A liberação das cargas depende do callback fornecido. Uma chamada com lista `NULL` não realiza nenhuma operação.
 - **Invariantes:** deixam de se aplicar após a destruição.
-- **Testes associados:** suítes M02 e M03 e destruição das estruturas utilizadas na M04.
+- **Testes associados:** M02, destruição de listas vazias e nulas; M03, destruição com callback; M04, liberação das listas utilizadas nos testes.
 
 ## 3. Operações de inserção, busca e remoção — M04
 
-As entradas e os resultados abaixo são descritos pelo comportamento registrado nos documentos do projeto. As assinaturas completas destas quatro funções não foram reproduzidas, pois os arquivos utilizados nesta consolidação não contêm as respectivas declarações de `include/lse.h`.
-
 ### `lse_inserir_fim`
 
-- **Entradas:** lista e ponteiro para a carga.
-- **Pré-condições:** lista válida e demais argumentos aceitos pela interface.
-- **Pós-condições:** em caso de sucesso, adiciona um nó ao final, preserva a ordem existente e incrementa `tamanho`.
-- **Retorno:** indicador de sucesso ou falha; argumentos inválidos não indicam sucesso.
-- **Memória:** aloca o novo nó; não copia a carga apontada.
-- **Invariantes:** encadeamento, tamanho e término em `NULL` preservados.
-- **Testes associados:** M04, inserção de três elementos e conferência de ordem.
+- **Assinatura:** `int lse_inserir_fim(t_lse *lista, void *carga)`.
+- **Pré-condições:** a lista deve ser válida.
+- **Pós-condições:** em caso de sucesso, adiciona um novo nó ao final, preservando a ordem dos elementos existentes e incrementando `tamanho`.
+- **Retorno:** `1` em caso de sucesso; `0` se a lista for `NULL` ou a alocação falhar.
+- **Memória:** aloca um novo nó, sem copiar ou alocar a carga.
+- **Invariantes:** preserva o encadeamento, o tamanho e o término da lista em `NULL`.
+- **Testes associados:** M04, inserção de elementos e conferência da ordem.
 
 ### `lse_remover_inicio`
 
-- **Entradas:** lista.
-- **Pré-condições:** lista válida; a situação de lista vazia é tratada.
-- **Pós-condições:** quando há elemento, remove o primeiro nó, atualiza `inicio` e decrementa `tamanho`.
-- **Retorno:** ponteiro para a carga removida; `NULL` para lista vazia.
-- **Memória:** libera o nó removido, sem liberar a carga retornada.
-- **Invariantes:** encadeamento e tamanho preservados, inclusive ao esvaziar a lista.
-- **Testes associados:** M04, remoções sucessivas e lista vazia.
-
-### `lse_buscar`
-
-- **Entradas:** lista, chave e callback comparador.
-- **Pré-condições:** parâmetros válidos conforme a interface da função.
-- **Pós-condições:** não altera a estrutura.
-- **Retorno:** ponteiro para a carga encontrada; `NULL` para chave inexistente ou argumentos inválidos, conforme os testes registrados.
-- **Memória:** não aloca nem libera.
-- **Invariantes:** preservadas por se tratar de consulta.
-- **Testes associados:** M04, chaves existentes e inexistentes, argumentos inválidos e músicas por ID.
-
-### `lse_remover`
-
-- **Entradas:** lista, chave e callback comparador.
-- **Pré-condições:** parâmetros válidos conforme a interface da função.
-- **Pós-condições:** ao encontrar a chave, retira o nó correspondente, reconecta os demais e decrementa `tamanho`; quando não encontra, mantém a estrutura.
-- **Retorno:** ponteiro para a carga removida; `NULL` para chave inexistente ou argumentos inválidos, conforme os testes registrados.
-- **Memória:** libera o nó e devolve a carga ao chamador.
-- **Invariantes:** encadeamento e tamanho preservados.
-- **Testes associados:** M04, remoções no início, meio e fim e músicas por ID.
-
-## 4. Propriedade das cargas e callbacks
-
-- A LSE gerencia a estrutura da lista e seus nós; a carga é armazenada como ponteiro `void *`, sem cópia do objeto.
-- `lse_destruir(lista, NULL)` libera a estrutura e os nós, mantendo as cargas sob responsabilidade de seus proprietários.
-- Quando apropriado, `destruir_carga` permite liberar as cargas na destruição da lista.
-- Busca e remoção por chave utilizam callback comparador para operar com diferentes tipos de dados.
-- Na integração futura com referências compartilhadas, deve haver um proprietário definido para cada carga, evitando liberações duplicadas.
-
-## 5. Continuidade nas missões futuras
-
-Os contratos acima limitam-se às operações explicitamente documentadas até a M04. **Permanece prevista a implementação das demais funções declaradas em `include/lse.h` que forem exigidas nas missões seguintes**, respeitando suas interfaces e os contratos correspondentes. Não se atribuem assinaturas ou estados individuais a operações não discriminadas nos registros desta etapa.
-
-**Referências:** [Diário de bordo](diario-de-bordo.md) · [Relatório de testes](relatorio-testes.md) · [Arquitetura](arquitetura.md).
+- **Assinatura:** `void *lse_remover_inicio(t_lse *lista)`.
+- **Pré-condições:** recebe uma lista válida ou `NULL`.
+- **Pós-condições:** quando existe um primeiro nó, remove esse nó, atualiza `inicio` e decrement
