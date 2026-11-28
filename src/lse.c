@@ -58,8 +58,8 @@ void *lse_primeiro(const t_lse *lista) {
 
 int lse_inserir_inicio(t_lse *lista, void*carga){
     if (lista == NULL) {
-    return 0;
-}
+        return 0;
+    }
 
     t_elem* novo = criar_elem_lse(carga);
 
@@ -79,7 +79,7 @@ int lse_inserir_inicio(t_lse *lista, void*carga){
 
 int lse_inserir_fim(t_lse *lista, void *carga){
     if (lista == NULL) {
-    return 0;
+        return 0;
     }
 
     t_elem* novo = criar_elem_lse(carga);
@@ -120,7 +120,7 @@ void *lse_remover_inicio(t_lse *lista) {
     return carga;
 } /* TODO M04 */
 
-void *lse_buscar(const t_lse *l, const void *key, t_comparador cmp) { 
+void *lse_buscar(const t_lse *l, const void *key, t_lse_comparador cmp) { 
     if (l == NULL || cmp == NULL) {
         return NULL;
     }
@@ -138,7 +138,7 @@ void *lse_buscar(const t_lse *l, const void *key, t_comparador cmp) {
 
  } /* TODO M04 */
 
-void *lse_remover(t_lse *l, const void *key, t_comparador cmp) { 
+void *lse_remover(t_lse *l, const void *key, t_lse_comparador cmp) { 
     if (l == NULL || cmp == NULL) {
         return NULL;
     }
@@ -168,7 +168,36 @@ void *lse_remover(t_lse *l, const void *key, t_comparador cmp) {
     return NULL;
  } /* TODO M04 */
 
-int lse_inserir_ordenado(t_lse *l, void *c, t_comparador cmp) { (void)l; (void)c; (void)cmp; return 0; } /* TODO M05 */
+int lse_inserir_ordenado(t_lse *lista, void *carga, t_lse_comparador comparar) { 
+    if(lista == NULL || comparar == NULL){
+        return 0;
+    }
+
+    t_elem *novo = criar_elem_lse(carga);
+    if(novo == NULL){
+        return 0;
+    }
+
+    t_elem *anterior = NULL;
+    t_elem *atual = lista->inicio;
+
+    while(atual != NULL && comparar(atual->carga, carga) <=0){
+        anterior = atual;
+        atual = atual->prox;
+    }
+
+    novo->prox = atual;
+
+    if(anterior == NULL){
+        lista->inicio = novo;
+    }else{
+        anterior->prox = novo;
+    }
+
+    lista->tamanho++;
+    return 1;
+ } 
+
 
 void lse_destruir(t_lse* lista, void (*destruir_carga)(void* )) { 
     if (lista == NULL) {
