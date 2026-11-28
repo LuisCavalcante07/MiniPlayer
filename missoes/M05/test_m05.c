@@ -78,14 +78,78 @@ static void teste_vazia_inicio_meio_fim(void) {
 
 static void teste_duplicados_estaveis(void) {
     musica_t a={10,"primeira"}, b={10,"segunda"}, c={5,"menor"}, d={10,"terceira"};
-    t_lse *l=lse_criar(); assert(l);
+    t_lse *l=lse_criar(); 
+    assert(l);
+
+    assert(lse_inserir_ordenado(l, &a, comparar_musica) == 1);
+    assert(lse_tamanho(l) == 1);
+    assert(lse_primeiro(l) == &a);
+
+    assert(lse_inserir_ordenado(l, &b, comparar_musica) == 1);
+    assert(lse_tamanho(l) == 2);
+    esperados[0] = &a;
+    esperados[1] = &b;
+    visitas = 0; 
+    quantidade_esperada = 2;
+    lse_percorrer(l, verificar_ordem);
+    assert(visitas == quantidade_esperada);
+
+    assert(lse_inserir_ordenado(l, &c, comparar_musica) == 1);
+    assert(lse_tamanho(l) == 3);
+    esperados[0] = &c;
+    esperados[1] = &a;
+    esperados[2] = &b;
+    visitas = 0;
+    quantidade_esperada = 3;
+    lse_percorrer(l, verificar_ordem);
+    assert(visitas == quantidade_esperada);
+
+    assert(lse_inserir_ordenado(l, &d, comparar_musica) == 1);
+    assert(lse_tamanho(l) == 4);
+    esperados[0] = &c;
+    esperados[1] = &a;
+    esperados[2] = &b;
+    esperados[3] = &d;
+    visitas = 0;
+    quantidade_esperada = 4;
+    lse_percorrer(l, verificar_ordem);
+    assert(visitas == quantidade_esperada);
+
  
     lse_destruir(l,NULL);
-    assert(1==0);
 }
 
 static void teste_invalido_e_reinsercao(void) {
-    assert(1==0);
+    t_lse *l = lse_criar();
+    assert(l);
+    int a = 20;
+    int b = 10;
+
+    assert(lse_inserir_ordenado(l, &a, comparar_int) == 1);
+    assert(lse_tamanho(l) == 1);
+    assert(lse_primeiro(l) == &a);
+
+    assert(lse_inserir_ordenado(NULL, &a, comparar_int) == 0); //Passando uma lisat nula
+    assert(lse_tamanho(l) == 1);
+    assert(lse_primeiro(l) == &a);
+
+    assert(lse_inserir_ordenado(l, &a, NULL) == 0); //passando um comaprador nulo
+    assert(lse_tamanho(l) == 1);
+    assert(lse_primeiro(l) == &a);
+
+    assert(lse_inserir_ordenado(l, &b, comparar_int) == 1);
+    assert(lse_tamanho(l) == 2);
+
+    esperados[0] = &b;
+    esperados[1] = &a;
+    visitas = 0;
+    quantidade_esperada = 2;
+
+    lse_percorrer(l, verificar_ordem);
+
+    assert(visitas == quantidade_esperada);
+    lse_destruir(l, NULL);
+
 }
 
 int main(void) {

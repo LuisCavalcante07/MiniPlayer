@@ -20,3 +20,15 @@ test: $(BUILD)/test_musica $(BUILD)/test_lse $(BUILD)/test_pilha $(BUILD)/test_f
 	@set -e; for t in $(BUILD)/test_musica $(BUILD)/test_lse $(BUILD)/test_pilha $(BUILD)/test_fila; do echo "== $$t =="; ./$$t; done
 clean:
 	rm -rf $(BUILD)
+
+# Integracao dos testes incrementais das missoes
+ARQUIVOS_MISSOES := $(wildcard missoes/M*/Makefile.incremental)
+
+TESTES_MISSOES :=
+
+-include $(ARQUIVOS_MISSOES)
+
+TESTES_MISSOES += $(patsubst missoes/M%/Makefile.incremental,test_m%,$(ARQUIVOS_MISSOES))
+
+.PHONY: test_missoes
+test_missoes: $(sort $(TESTES_MISSOES))

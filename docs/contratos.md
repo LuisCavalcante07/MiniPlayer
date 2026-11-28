@@ -1,6 +1,6 @@
 # Contratos dos TADs — MiniPlayer
 
-**Escopo:** operações da lista simplesmente encadeada (LSE) desenvolvidas e testadas até a missão M04. Os contratos iniciais foram trabalhados na M02, a estrutura e suas operações básicas foram desenvolvidas na M03, e as operações adicionais de inserção, busca e remoção foram implementadas na M04.
+**Escopo:** operações da lista simplesmente encadeada (LSE) desenvolvidas e testadas até a missão M05. Os contratos iniciais foram trabalhados na M02, a estrutura e suas operações básicas foram desenvolvidas na M03, as operações adicionais de inserção, busca e remoção foram implementadas na M04, e a operação de inserção ordenada com estabilidade dos elementos duplicados foi implementada na M05.
 
 ## 1. Invariantes da LSE
 

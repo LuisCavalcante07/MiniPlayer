@@ -4,7 +4,7 @@ M05_CFLAGS := -std=c11 -Wall -Wextra -Wpedantic -g -Iinclude
 TESTES_MISSOES += test_m05
 .PHONY: test_m05
 build/test_m05_incremental: missoes/M05/test_m05.c src/lse.c include/lse.h
-	@mkdir -p build
+	@if not exist build mkdir build
 	$(M05_CC) $(M05_CFLAGS) missoes/M05/test_m05.c src/lse.c -o $@
 test_m05: build/test_m05_incremental
 	./build/test_m05_incremental
